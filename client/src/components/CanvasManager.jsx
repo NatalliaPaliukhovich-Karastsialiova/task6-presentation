@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Stage, Layer } from 'react-konva';
-import { CanvasReducer } from './canvasReducer';
+import { CanvasReducer } from './CanvasReducer';
 import SelectableShape from './SelectableShape';
 import { createShape } from '../utils/canvasUtils';
 import { socket } from '../services/socket';
