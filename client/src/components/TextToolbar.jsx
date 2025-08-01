@@ -6,7 +6,7 @@ export default function TextToolbar({ textShape, onChange }) {
   if (!textShape) return null;
 
   const handleChange = (prop, value) => {
-    onChange({ [prop]: value });
+    onChange({ id: textShape.id, changes: {[prop]: value }});
   };
 
   return (

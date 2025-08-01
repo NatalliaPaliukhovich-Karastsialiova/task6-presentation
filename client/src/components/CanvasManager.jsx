@@ -219,6 +219,8 @@ const CanvasManager = forwardRef(function CanvasManager({
 
   const handleMouseUp = () => {
     setIsDrawing(false);
+    pushHistory(shapes);
+    saveSlide(shapes);
   };
 
   const handleZoom = (direction) => {
@@ -265,11 +267,12 @@ const CanvasManager = forwardRef(function CanvasManager({
     saveSlide(updatedShapes);
   };
 
-  const handleTextToolbarChange = (updates) => {
-    dispatch({ type: 'UPDATE_SHAPE', payload: { id: selectedId, updates: updates } });
-    setSelectedShape((prev) => ({ ...prev, ...updates }));
+  const handleTextToolbarChange = (res) => {
+    const {id, changes} = res;
+    dispatch({ type: 'UPDATE_SHAPE', payload: { id: selectedId, updates: changes } });
+    setSelectedShape((prev) => ({ ...prev, ...changes }));
     const updatedShapes = shapes.map((s) =>
-      s.id === selectedShape.id ? { ...s, ...updates } : s
+      s.id === id ? { ...s, ...changes, fill: selectedColor } : s
     );
     pushHistory(updatedShapes);
     saveSlide(updatedShapes);

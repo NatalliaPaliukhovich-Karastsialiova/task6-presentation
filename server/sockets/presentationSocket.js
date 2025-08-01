@@ -8,17 +8,6 @@ import { addSlide, deleteSlide, updateSlide, getSlides } from '../controllers/sl
 export default function presentationSocket(io, socket) {
   console.log("User connected:", socket.id);
 
-
-  socket.on("getPresentationWithRole", async (data, callback) => {
-    try {
-      const result = await getPresentationWithRole(data);
-      callback({ success: true, ...result });
-    } catch (err) {
-      callback({ success: false, error: err.message });
-    }
-  });
-
-
   socket.on("addSlide", async (data) => {
     try {
       const result = await addSlide(data);
@@ -32,9 +21,18 @@ export default function presentationSocket(io, socket) {
   socket.on("updateSlide", async (data) => {
     try {
       const updated = await updateSlide(data);
-      socket.to(data.presentationId).emit("slideUpdated", updated);
+      io.to(data.presentationId).emit("slideUpdated", updated);
     } catch (err) {
       socket.emit("slideUpdateError", { error: err.message });
+    }
+  });
+
+  socket.on("deleteSlide", async (data) => {
+    try {
+      const updated = await updatePresentation(data);
+      io.to(data.presentationId).emit("slideDeleted", updated);
+    } catch (err) {
+      socket.emit("slideDeletedError", { error: err.message });
     }
   });
 
@@ -48,6 +46,15 @@ export default function presentationSocket(io, socket) {
     }
   });
 
+  socket.on("getPresentationWithRole", async (data, callback) => {
+    try {
+      const result = await getPresentationWithRole(data);
+      callback({ success: true, ...result });
+    } catch (err) {
+      callback({ success: false, error: err.message });
+    }
+  });
+
 
   socket.on("updateParticipantRole", async (data) => {
     try {
@@ -55,16 +62,6 @@ export default function presentationSocket(io, socket) {
       io.to(data.presentationId).emit("participantRoleUpdated", updated);
     } catch (err) {
       socket.emit("participantRoleUpdatedError", { error: err.message });
-    }
-  });
-
-
-  socket.on("deleteSlide", async (data) => {
-    try {
-      const updated = await updatePresentation(data);
-      io.to(data.presentationId).emit("slideDeleted", updated);
-    } catch (err) {
-      socket.emit("slideDeletedError", { error: err.message });
     }
   });
 

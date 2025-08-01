@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef  } from 'react';
 import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CanvasManager from '../components/CanvasManager';
 import ParticipantsManagerButton from '../components/ParticipantsManagerButton';
 import ParticipantsPopup from '../components/ParticipantsPopup';
@@ -13,6 +14,7 @@ import './style.css';
 
 export default function Presentation({ nickname }) {
   const { presentationId } = useParams();
+  const [presentationName, setPresentationName] = useState();
   const [participants, setParticipants] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [slides, setSlides] = useState([]);
@@ -21,6 +23,7 @@ export default function Presentation({ nickname }) {
   const [role, setRole] = useState('viewer');
   const [open, setOpen] = useState(false);
   const [isSlideshow, setIsSlideshow] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const canvasRefs = useRef([]);
   const { setLoading } = useLoader();
 
@@ -37,6 +40,7 @@ export default function Presentation({ nickname }) {
           if (response.presentation.slides?.length > 0) setActiveSlide(response.presentation.slides[0]);
         }
         setParticipants(response.presentation.participants);
+        setPresentationName(response.presentation.title);
         setRole(response.role);
         const canEdit = (response.role !== 'viewer') ? true : false;
         const isOwner = (response.role === 'owner') ? true : false;
@@ -146,7 +150,10 @@ export default function Presentation({ nickname }) {
     socket.emit("updateSlide", { presentationId, slideId, title: newTitle });
   };
 
+
   const handleExportPDF = async () => {
+    setLoading(true);
+    setIsExporting(true);
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: 'a4' });
 
     for (let i = 0; i < slides.length; i++) {
@@ -161,14 +168,19 @@ export default function Presentation({ nickname }) {
       }
     }
 
-    pdf.save('presentation.pdf');
+    pdf.save(`${presentationName}.pdf`);
+    setLoading(false);
+    setIsExporting(false);
   };
 
   return (
     <div className="presentation-container">
       <header className="top-bar shadow-sm" style={{backgroundColor: 'gray'}}>
-        <div className="fw-bold app-title">PresentShare</div>
+        <Link to="/presentations" className="text-decoration-none text-light fs-4">
+          PresentShare
+        </Link>
         <div className="d-flex align-items-center gap-2">
+          <span className="text-light fs-4 me-3">Hello, {localStorage.getItem('nickname')}</span>
           <button className="btn btn-lg"
             style={{backgroundColor: '#f2f3f7'}}
             onClick={() => handleExportPDF()}
@@ -236,21 +248,23 @@ export default function Presentation({ nickname }) {
           currentUser={currentUser}
         />
       )}
-      <div style={{display: 'none'}}>
-        {slides.map((slide, i) => (
-          <CanvasManager
-            key={slide._id}
-            ref={(el) => (canvasRefs.current[i] = el)}
-            slide={slide}
-            canEdit={false}
-            tool={null}
-            width={1200}
-            height={800}
-            isSlideShow={true}
-            selectedColor="#000000"
-          />
-        ))}
-      </div>
+      {setIsExporting && (
+        <div style={{display: 'none'}}>
+          {slides.map((slide, i) => (
+            <CanvasManager
+              key={slide._id}
+              ref={(el) => (canvasRefs.current[i] = el)}
+              slide={slide}
+              canEdit={false}
+              tool={null}
+              width={1200}
+              height={800}
+              isSlideShow={true}
+              selectedColor="#000000"
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

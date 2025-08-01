@@ -38,9 +38,9 @@ export default function MyPresentations() {
   return (
     <div>
       <nav className="navbar navbar-light px-4 shadow-sm" style={{backgroundColor: 'gray'}}>
-        <span className="navbar-brand h1">PresentShare</span>
+        <span className="text-decoration-none text-light fs-4">PresentShare</span>
         <div className="d-flex align-items-center">
-          <span className="h5 me-3">Hello, {nickname}</span>
+          <span className="text-light fs-4 me-3">Hello, {nickname}</span>
           <button className="btn btn-outline-light btn-lg" onClick={handleLogout}>Logout</button>
         </div>
       </nav>
