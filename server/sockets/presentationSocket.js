@@ -21,7 +21,18 @@ export default function presentationSocket(io, socket) {
   socket.on("updateSlide", async (data) => {
     try {
       const updated = await updateSlide(data);
-      io.to(data.presentationId).emit("slideUpdated", updated);
+      console.log("updateSlide")
+      socket.to(data.presentationId).emit("slideUpdated", updated);
+    } catch (err) {
+      socket.emit("slideUpdateError", { error: err.message });
+    }
+  });
+
+  socket.on("updateSlideBroadcast", async (data) => {
+    try {
+      const updated = await updateSlide(data);
+      console.log("updateSlideBroadcast")
+      io.to(data.presentationId).emit("slideUpdatedBroadcast", updated);
     } catch (err) {
       socket.emit("slideUpdateError", { error: err.message });
     }

@@ -67,6 +67,15 @@ export default function Presentation({ nickname }) {
       );
     };
 
+    const handleSlidesBroadcast = (slide) => {
+      setSlides((prev) =>
+        prev.map((s) => (s._id === slide._id ? { ...s, title: slide.title, elements: slide.elements } : s))
+      );
+      setActiveSlide((prev) =>
+        prev && prev._id === slide._id ? { ...prev, title: slide.title, elements: slide.elements } : prev
+      );
+    };
+
     const handlePresentationUpdated = (slides) => {
       setSlides(slides)
       toast.success("Slides reordered!");
@@ -74,6 +83,7 @@ export default function Presentation({ nickname }) {
 
     const handleSlideDelete = (slides) => {
       setSlides(slides)
+      if(slides.length > 0) setActiveSlide(slides[0]);
       toast.success("Slide deleted!");
     };
 
@@ -103,6 +113,7 @@ export default function Presentation({ nickname }) {
     socket.on("slideDeleted", handleSlideDelete);
     socket.on("participantRoleUpdated", handleParticipantRoleUpdated);
     socket.on("slidesRead", handleSlidesRead);
+    socket.on("slideUpdatedBroadcast", handleSlidesBroadcast);
 
     return () => {
       socket.emit('leavePresentation', { presentationId, userId });
@@ -112,6 +123,7 @@ export default function Presentation({ nickname }) {
       socket.off("presentationUpdated", handlePresentationUpdated);
       socket.off("slideDeleted", handleSlideDelete);
       socket.off("slidesRead", handleSlidesRead);
+      socket.off("slideUpdatedBroadcast", handleSlidesBroadcast);
     };
 
   }, [presentationId]);

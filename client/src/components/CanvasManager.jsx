@@ -17,6 +17,7 @@ const CanvasManager = forwardRef(function CanvasManager({
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedShape, setSelectedShape] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(null);
+  const [currentText, setCurrentText] = useState(null);
 
   const [test, setTest] = useState(null);
   const stageRef = useRef();
@@ -93,7 +94,7 @@ const CanvasManager = forwardRef(function CanvasManager({
     if (tool !== 'brush' && tool !== 'eraser') {
       setTool(null);
     }
-  }, [tool, canEdit, selectedColor]);
+  }, [tool, canEdit]);
 
   useEffect(() => {
     if (selectedId) {
@@ -188,6 +189,14 @@ const CanvasManager = forwardRef(function CanvasManager({
     });
   };
 
+  const saveSlideBroadcast = (updatedShapes) => {
+    socket.emit('updateSlideBroadcast', {
+      presentationId: presentationId,
+      slideId: slide._id,
+      elements: updatedShapes,
+    });
+  };
+
   const handleMouseDown = (e) => {
     if (!canEdit) return;
     checkDeselect(e);
@@ -222,7 +231,7 @@ const CanvasManager = forwardRef(function CanvasManager({
   const handleMouseUp = () => {
     setIsDrawing(false);
     pushHistory(shapes);
-    saveSlide(shapes);
+  //  saveSlide(shapes);
   };
 
   const handleZoom = (direction) => {
@@ -258,18 +267,22 @@ const CanvasManager = forwardRef(function CanvasManager({
   };
 
   const handleChangeText = (id, newText) => {
-    const updatedShapes = shapes.map((s) =>
-      s.id === id ? { ...s, text: newText} : s
-    );
-    pushHistory(updatedShapes);
-    saveSlide(updatedShapes);
+    if(currentText !== newText){
+      setCurrentText(newText);
+      const updatedShapes = shapes.map((s) =>
+        s.id === id ? { ...s, text: newText, fill: selectedColor } : s
+      );
+      pushHistory(updatedShapes);
+      saveSlideBroadcast(updatedShapes);
+    }
   };
 
   const handleTextToolbarChange = (res) => {
     const {id, changes} = res;
+    dispatch({ type: 'UPDATE_SHAPE', payload: { id: selectedId, updates: changes } });
     setSelectedShape((prev) => ({ ...prev, ...changes }));
     const updatedShapes = shapes.map((s) =>
-      s.id === id ? { ...s, ...changes} : s
+      s.id === id ? { ...s, ...changes, fill: selectedColor } : s
     );
     pushHistory(updatedShapes);
     saveSlide(updatedShapes);

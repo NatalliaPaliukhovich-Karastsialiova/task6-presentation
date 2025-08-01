@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 
 export default function TextEditor({ textNode, onClose, onChange }) {
   const textareaRef = useRef(null);
+  const hasSubmitted = useRef(false);
 
   useEffect(() => {
     if (!textNode) return;
@@ -13,19 +14,14 @@ export default function TextEditor({ textNode, onClose, onChange }) {
 
       const stage = textNode.getStage();
       const textPosition = textNode.absolutePosition();
-      const stageBox = stage.container().getBoundingClientRect();
-      const areaPosition = {
-        x: textPosition.x,
-        y: textPosition.y,
-      };
 
       textarea.value = textNode.text();
+
       Object.assign(textarea.style, {
         position: 'absolute',
-        top: `${areaPosition.y}px`,
-        left: `${areaPosition.x}px`,
+        top: `${textPosition.y}px`,
+        left: `${textPosition.x}px`,
         width: `${textNode.width() - textNode.padding() * 2}px`,
-        height: `${textNode.height() - textNode.padding() * 2 + 5}px`,
         fontSize: `${textNode.fontSize()}px`,
         border: 'none',
         padding: '0px',
@@ -46,43 +42,46 @@ export default function TextEditor({ textNode, onClose, onChange }) {
       textarea.style.height = `${textarea.scrollHeight + 3}px`;
       textarea.focus();
 
-      let ignoreClick = true;
+      const finishEditing = () => {
+        if (hasSubmitted.current) return;
+        hasSubmitted.current = true;
+        const newText = textarea.value;
+        const oldText = textNode.text();
+
+        onClose();
+        if (newText !== oldText) {
+          onChange(newText);
+        }
+      };
 
       const handleOutsideClick = (e) => {
-        if (e.target !== textarea) {
-          onChange(textarea.value);
-          onClose();
-        }
+        if (e.target !== textarea) finishEditing();
       };
 
       const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
-          onChange(textarea.value);
-          onClose();
+          finishEditing();
         }
         if (e.key === 'Escape') {
+          hasSubmitted.current = true;
           onClose();
         }
       };
 
       const handleInput = () => {
-        const scale = textNode.getAbsoluteScale().x;
-        textarea.style.width = `${textNode.width() * scale}px`;
         textarea.style.height = 'auto';
         textarea.style.height = `${textarea.scrollHeight + textNode.fontSize()}px`;
       };
 
-      setTimeout(() => {
-        window.addEventListener('click', handleOutsideClick);
-      });
+      window.addEventListener('click', handleOutsideClick);
       textarea.addEventListener('keydown', handleKeyDown);
       textarea.addEventListener('input', handleInput);
 
       return () => {
+        window.removeEventListener('click', handleOutsideClick);
         textarea.removeEventListener('keydown', handleKeyDown);
         textarea.removeEventListener('input', handleInput);
-        window.removeEventListener('click', handleOutsideClick);
       };
     }, 0);
 
@@ -91,10 +90,7 @@ export default function TextEditor({ textNode, onClose, onChange }) {
 
   return (
     <Html>
-      <textarea
-        ref={textareaRef}
-        style={{ minHeight: '1em', position: 'absolute' }}
-      />
+      <textarea ref={textareaRef} style={{ minHeight: '1em', position: 'absolute' }} />
     </Html>
   );
 }
