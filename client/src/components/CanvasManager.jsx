@@ -17,6 +17,8 @@ const CanvasManager = forwardRef(function CanvasManager({
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedShape, setSelectedShape] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(null);
+
+  const [test, setTest] = useState(null);
   const stageRef = useRef();
 
   const history = useRef([]);
@@ -256,12 +258,8 @@ const CanvasManager = forwardRef(function CanvasManager({
   };
 
   const handleChangeText = (id, newText) => {
-    dispatch({
-      type: 'UPDATE_SHAPE',
-      payload: { id, updates: { text: newText, fill: selectedColor } },
-    });
     const updatedShapes = shapes.map((s) =>
-      s.id === id ? { ...s, text: newText, fill: selectedColor } : s
+      s.id === id ? { ...s, text: newText} : s
     );
     pushHistory(updatedShapes);
     saveSlide(updatedShapes);
@@ -269,10 +267,9 @@ const CanvasManager = forwardRef(function CanvasManager({
 
   const handleTextToolbarChange = (res) => {
     const {id, changes} = res;
-    dispatch({ type: 'UPDATE_SHAPE', payload: { id: selectedId, updates: changes } });
     setSelectedShape((prev) => ({ ...prev, ...changes }));
     const updatedShapes = shapes.map((s) =>
-      s.id === id ? { ...s, ...changes, fill: selectedColor } : s
+      s.id === id ? { ...s, ...changes} : s
     );
     pushHistory(updatedShapes);
     saveSlide(updatedShapes);

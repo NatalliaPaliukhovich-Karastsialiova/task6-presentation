@@ -1,6 +1,7 @@
 import React from 'react';
 
 const fonts = ['Arial', 'Verdana', 'Times New Roman', 'Courier New', 'Georgia'];
+const fontSizes = ['12', '16', '24', '32', '42', '48', '60', '72', '92'];
 
 export default function TextToolbar({ textShape, onChange }) {
   if (!textShape) return null;
@@ -33,12 +34,14 @@ export default function TextToolbar({ textShape, onChange }) {
       <button className="toolbar-btn" onClick={() => handleChange('align', 'center')}>≡</button>
       <button className="toolbar-btn" onClick={() => handleChange('align', 'right')}>⯈</button>
 
-      <input className="toolbar-btn"
-        type="number"
-        value={textShape.fontSize}
-        onChange={(e) => handleChange('fontSize', parseInt(e.target.value))}
-        style={{ width: '60px', textAlign: 'center' }}
-      />
+      <select className="toolbar-btn" style={{ width: 'auto' }}
+        value={textShape.fontSize || '24'}
+        onChange={(e) => handleChange('fontSize', e.target.value)}
+      >
+        {fontSizes.map((fontsize) => (
+          <option key={fontsize} value={fontsize}>{fontsize}</option>
+        ))}
+      </select>
 
       <select className="toolbar-btn" style={{ width: 'auto' }}
         value={textShape.fontFamily || 'Arial'}

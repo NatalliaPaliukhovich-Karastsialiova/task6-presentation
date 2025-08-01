@@ -161,15 +161,7 @@ export default function SelectableShape({ shape, isSelected, onSelect, onDragEnd
   return (
     <>
       {renderShape()}
-      {isSelected && canEdit && shape.type !== 'text' && <Transformer ref={trRef} rotateEnabled={true} />}
-      {isSelected && canEdit && shape.type === 'text' &&
-        <Transformer ref={trRef} rotateEnabled={true}
-            enabledAnchors={['middle-left', 'middle-right']}
-            boundBoxFunc={(oldBox, newBox) => ({
-              ...newBox,
-              width: Math.max(30, newBox.width),
-            })}/>
-      }
+      {isSelected && canEdit && <Transformer ref={trRef} rotateEnabled={true} />}
     </>
   );
 }
