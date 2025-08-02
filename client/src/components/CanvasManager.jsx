@@ -231,7 +231,7 @@ const CanvasManager = forwardRef(function CanvasManager({
   const handleMouseUp = () => {
     setIsDrawing(false);
     pushHistory(shapes);
-  //  saveSlide(shapes);
+    if (tool === 'brush' || tool === 'eraser') saveSlide(shapes);
   };
 
   const handleZoom = (direction) => {
